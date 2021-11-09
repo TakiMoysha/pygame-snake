@@ -7,7 +7,7 @@ from consts import CELLSIZE, BLUE, RED, WHITE, SCALINGTEXTTODISPLAY, GAMESPEED
 from spawner import Spawner
 
 # ===========Initial game=============
-key_velocity_control = {
+key_game_control = {
     pygame.K_LEFT: lambda:
         player.change_velocity(vector_x=(-1 * CELLSIZE), vector_y=0),
     pygame.K_RIGHT: lambda:
@@ -67,8 +67,8 @@ def on_food_created():
 
 
 def control_key_handler(event_key):
-    if event_key in key_velocity_control:
-        key_velocity_control.get(event_key)()
+    if event_key in key_game_control:
+        key_game_control.get(event_key)()
     elif event_key in debug_key_control:
         debug_key_control.get(event_key)()
 
