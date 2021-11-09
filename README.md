@@ -14,3 +14,6 @@ The control is described in the `key_game_control` dictionary.
 |F3      |  Add 1 point (square) to snake  |
 |F4      |  Respawn food  |
 
+# Start
+For startup, you will need pygame==2.0.2^
+```python runner.py```
