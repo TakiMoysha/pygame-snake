@@ -4,8 +4,9 @@ import pygame
 
 from player import Player
 from consts import CELLSIZE, BLUE, RED, WHITE, SCALINGTEXTTODISPLAY, GAMESPEED
+from spawner import Spawner
 
-# ? class lvl -> settings
+# ===========Initial game=============
 key_velocity_control = {
     pygame.K_LEFT: lambda:
         player.change_velocity(vector_x=(-1 * CELLSIZE), vector_y=0),
@@ -24,6 +25,7 @@ debug_key_control = {
             [player.__getattribute__(atr) for atr in player.__slots__]
         ),
     pygame.K_F3: lambda: player.add_len(1),
+    pygame.K_F4: lambda: spawner.create_new_pos()
 }
 
 dispaly_size = {
@@ -37,8 +39,10 @@ center_level_point = (
 
 global player
 player = Player()
-
 player.set_position(*center_level_point)
+
+global spawner
+spawner = Spawner(*dispaly_size.values())
 
 pygame.init()
 
@@ -46,13 +50,19 @@ DISPLAYSURF = pygame.display.set_mode(tuple(dispaly_size.values()))
 pygame.display.update()
 clock = pygame.time.Clock()
 
-
+# Flags
+food_exist = False
 game_over = False
 
 
 def on_game_over():
     global game_over
     game_over = True
+
+
+def on_food_created():
+    global food_exist
+    food_exist = True
 
 
 def control_key_handler(event_key):
@@ -62,22 +72,25 @@ def control_key_handler(event_key):
         debug_key_control.get(event_key)()
 
 
-# game loop
 def display_surf_update():
     def draw_snake():
         snake_pos_list = player.get_snake_body_pos_list()
         for pos in snake_pos_list:
             pygame.draw.rect(DISPLAYSURF, BLUE, [*pos, CELLSIZE, CELLSIZE])
 
+    def draw_food():
+        food_pos = spawner.current_pos
+        pygame.draw.rect(DISPLAYSURF, RED, [*food_pos, CELLSIZE, CELLSIZE])
+
     DISPLAYSURF.fill(WHITE)
+    draw_food()
     draw_snake()
 
 
 def is_player_pos_in_out_game_field(x, y) -> bool:
     if dispaly_size.get("width") - CELLSIZE < x or x < 0:
         return True
-
-    if dispaly_size.get("height") - CELLSIZE < y or y < 0:
+    elif dispaly_size.get("height") - CELLSIZE < y or y < 0:
         return True
 
     return False
@@ -95,8 +108,12 @@ def start_game_loop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 on_game_over()
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 control_key_handler(event.key)
+
+        if not food_exist:
+            spawner.create_new_pos()
+            on_food_created()
 
         display_surf_update()
         player.update_position()
