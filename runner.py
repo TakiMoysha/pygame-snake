@@ -55,6 +55,7 @@ food_exist = False
 game_over = False
 
 
+# ===========Functions=============
 def on_game_over():
     global game_over
     game_over = True
@@ -87,6 +88,11 @@ def display_surf_update():
     draw_snake()
 
 
+def player_eat_food():
+    player.add_len(1)
+    spawner.create_new_pos()
+
+
 def is_player_pos_in_out_game_field(x, y) -> bool:
     if dispaly_size.get("width") - CELLSIZE < x or x < 0:
         return True
@@ -103,6 +109,26 @@ def is_player_faced_with_himself(x, y) -> bool:
     return False
 
 
+def message(msg, color, text_bias_y=0):
+    font_style = pygame.font.SysFont(None, 30)
+    text = font_style.render(msg, True, color)
+    text_bias_x = len(msg) * SCALINGTEXTTODISPLAY
+    x_text_pos = dispaly_size.get("width")/2 - text_bias_x
+    y_text_pos = dispaly_size.get("height")/2 - text_bias_y
+    center_coord_text = [x_text_pos, y_text_pos]
+    DISPLAYSURF.blit(text, center_coord_text)
+
+
+def end_game():
+    message(f"Record: {player.snake_len}", RED, -30)
+    message("End game", RED)
+    pygame.display.update()
+    time.sleep(1)
+    pygame.quit()
+    quit()
+
+
+# ===========Game Loop=============
 def start_game_loop():
     while not game_over:
         for event in pygame.event.get():
@@ -113,6 +139,8 @@ def start_game_loop():
 
         if not food_exist:
             spawner.create_new_pos()
+            while spawner.current_pos in player.get_snake_body_pos_list():
+                spawner.create_new_pos()
             on_food_created()
 
         display_surf_update()
@@ -121,34 +149,17 @@ def start_game_loop():
 
         x, y = player.get_head_position()
 
-        if is_player_pos_in_out_game_field(x, y):
+        if spawner.current_pos == player.get_head_position():
+            player_eat_food()
+        elif is_player_pos_in_out_game_field(x, y):
             on_game_over()
         elif is_player_faced_with_himself(x, y):
             on_game_over()
 
         clock.tick(GAMESPEED)
 
-
-def message(msg, color):
-    font_style = pygame.font.SysFont(None, 30)
-    text = font_style.render(msg, True, color)
-    text_bias_x = len(msg) * SCALINGTEXTTODISPLAY
-    center_coord_text = [
-        dispaly_size.get("width")/2 - text_bias_x,
-        dispaly_size.get("height")/2
-    ]
-    DISPLAYSURF.blit(text, center_coord_text)
-
-
-def end_game():
-    message("End game", RED)
-    pygame.display.update()
-    time.sleep(1)
-    pygame.quit()
-    quit()
+    end_game()
 
 
 if __name__ == "__main__":
     start_game_loop()
-
-    end_game()

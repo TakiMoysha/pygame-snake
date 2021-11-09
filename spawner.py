@@ -2,6 +2,7 @@ import random
 
 from consts import CELLSIZE
 
+
 class Spawner:
     current_pos = (0, 0)
 
